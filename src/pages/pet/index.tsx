@@ -1,6 +1,8 @@
+import PetView from "@/views/pet"
+
 const Pet = () => {
   return (
-    <></>
+    <PetView />
   )
 }
 
