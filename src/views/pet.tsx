@@ -269,8 +269,8 @@ const PetView = () => {
           <hr/>
           {editedViewModels.map(item =>
             <ul key={item.id}>
-              <li>{item.name}</li>
-              <li>{item.type}</li>
+              <li className="col">{item.name}</li>
+              <li className="col">{item.type}</li>
             </ul>
           )}
         </div>
