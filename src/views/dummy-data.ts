@@ -28,6 +28,20 @@ const items: Omit<Response, "id">[] = [
     isApproachAlert: 0,
     approachAlertRadius: 0,
     isUse: true,
+  },
+  {
+    name: "piyopiyo",
+    volume: 0,
+    type: "bird",
+    color: "",
+    totalWeight: 0,
+    maxVolume: 0,
+    maxLoadingVolume: 0,
+    maxLoadingWeight: 0,
+    dailyTransportPlanCount: 0,
+    isApproachAlert: 0,
+    approachAlertRadius: 0,
+    isUse: false,
   }
 ]
 

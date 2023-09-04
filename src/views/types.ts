@@ -1,4 +1,4 @@
-type PetType = "cat" | "dog" | "fish"
+type PetType = "cat" | "dog" | "fish" | "bird"
 
 export type Response = {
   id: number;

@@ -1,8 +1,9 @@
 import { ENDPOINTS } from "@/repository/endpoints";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { data } from "./dummy-data";
+import { adaptor } from "./adaptor";
 
-type AnimalType = "cat" | "dog" | "fish"
+type AnimalType = "cat" | "dog" | "fish" | "bird"
 
 type Response = {
   id: number;
@@ -46,8 +47,8 @@ type ViewModel = {
 // タブに表示する車両種類の定義
 const TabGroupByKind = {
   tab1: [""],
-  tab2: ["cat"],
-  tab3: ["dog"],
+  tab2: ["cat", "dog"],
+  tab3: ["bird"],
   tab4: ["fish"],
 }
 
@@ -80,10 +81,10 @@ const PetView = () => {
   // 編集ビューモデル一覧
   const [editedViewModels, setEditedViewModels] = useState<ViewModel[]>([])
   // 表示のフィルタ
-  const [useOnly, setUseOnly] = useState()
+  const [useOnly, setUseOnly] = useState(false)
   // モーダル
   // const [modal, setModal] = useState()
-
+  const onChangeUseOnly = (value: boolean) => setUseOnly(value);
 
   // const nameComparator = (a: ViewModel, b: ViewModel) => {
   //   if (a.name == b.name) return 0;
@@ -209,21 +210,10 @@ const PetView = () => {
   //     // 表示するカラムをPush
   //   }
   // }
-
-
-  // const onSave = () => {
-  //   // request
-  //   new Promise((resolve) => resolve(""))
-  //     .then()
-  //     .catch(e => {
-  //       // 何かの処理
-  //       throw e
-  //     })
-  // }
-
-  // const onCreate = () => {
-  //   // 新規レコードの作成
-  // }
+  // 新規レコードの作成
+  const onClickCreate = () => {
+    console.log(1)
+  }
 
   // const convertParams = () => {
   //   // 新規
@@ -231,18 +221,21 @@ const PetView = () => {
   // const convertParams = () => {
   //   // 編集
   // }
-  // // 初期表示
-  // useEffect(() => {
-  //   axios.get<Response[]>(URL)
-  //     .then(res => setEditedViewModels(res.data))
-  //     .catch(e => { throw e })
-  // }, [])
+
+  const itemsWithUseOnly = useMemo(() => {
+    return useOnly
+      ? editedViewModels.filter(model => model.isUse)
+      : editedViewModels
+  }, [editedViewModels, useOnly])
 
   const onSave = () => {
     console.log("save!")
-    setEditMode(false)
+    adaptor.get<Response>(URL)
+      .then(() => setEditMode(false))
+      .catch(console.error)
   }
 
+  // 初期表示
   useEffect(() => {
     setEditedViewModels(translateResponse(data))
   }, [])
@@ -251,7 +244,7 @@ const PetView = () => {
     <main className="container">
       <div className="controls">
         <div className="toggle-use-only">
-          {!editMode && <span><input type="checkbox" checked={useOnly} />利用のみ表示</span>}
+          {!editMode && <span><input type="checkbox" checked={useOnly} onChange={({ target }) => onChangeUseOnly(target.checked)} />利用のみ表示</span>}
           {editMode && <span style={{ marginLeft: "20px" }}>編集モード</span>}
         </div>
         <div>
@@ -261,18 +254,24 @@ const PetView = () => {
         </div>
       </div>
       <div>
+        <div className="tab-area">
+
+        </div>
         <div className="table">
           <ul>
             <li>名前</li>
             <li>種類</li>
           </ul>
-          <hr/>
-          {editedViewModels.map(item =>
-            <ul key={item.id}>
-              <li className="col">{item.name}</li>
-              <li className="col">{item.type}</li>
-            </ul>
-          )}
+          <hr />
+          <div>
+            {itemsWithUseOnly.map(item =>
+              <ul key={item.id}>
+                <li className="col">{item.name}</li>
+                <li className="col">{item.type}</li>
+              </ul>
+            )}
+          </div>
+          <button onClick={onClickCreate}>追加</button>
         </div>
       </div>
     </main>
