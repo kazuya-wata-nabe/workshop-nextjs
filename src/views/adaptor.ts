@@ -29,4 +29,4 @@ const post = async <T>(url: string, params?: Record<string, string>) => {
 
 export const adaptor = {
   get, post
-}
+} as const

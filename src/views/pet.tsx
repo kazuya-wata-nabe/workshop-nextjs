@@ -2,6 +2,7 @@ import { ENDPOINTS } from "@/repository/endpoints";
 import { useEffect, useMemo, useState } from "react";
 import { data } from "./dummy-data";
 import { adaptor } from "./adaptor";
+import { Tab } from "./components/tab";
 
 type AnimalType = "cat" | "dog" | "fish" | "bird"
 
@@ -254,27 +255,31 @@ const PetView = () => {
         </div>
       </div>
       <div>
-        <div className="tab-area">
-
-        </div>
-        <div className="table">
-          <ul>
-            <li>名前</li>
-            <li>種類</li>
-          </ul>
-          <hr />
-          <div>
-            {itemsWithUseOnly.map(item =>
-              <ul key={item.id}>
-                <li className="col">{item.name}</li>
-                <li className="col">{item.type}</li>
+        <Tab defaultKey="">
+          <Tab.Item title="tab1" tabKey="tab1">
+            <div className="table">
+              <ul>
+                <li>名前</li>
+                <li>種類</li>
               </ul>
-            )}
-          </div>
-          <button onClick={onClickCreate}>追加</button>
-        </div>
+              <hr />
+              <div>
+                {itemsWithUseOnly.map(item =>
+                  <ul key={item.id}>
+                    <li className="col">{item.name}</li>
+                    <li className="col">{item.type}</li>
+                  </ul>
+                )}
+              </div>
+              <button onClick={onClickCreate}>追加</button>
+            </div>
+          </Tab.Item>
+          <Tab.Item title="2" tabKey="tab2">
+            <div>hoge</div>
+          </Tab.Item>
+        </Tab>
       </div>
-    </main>
+    </main >
   )
 }
 

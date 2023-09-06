@@ -1,0 +1,1 @@
+export type TypeAlias<T extends string = string> = T
