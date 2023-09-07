@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { ReactElement, useCallback, useMemo, useState } from "react";
 import { TabContext } from "./context";
 import { TabItem } from "./item";
@@ -12,7 +13,6 @@ type TabItem<T extends string> = {
   key: T;
 };
 
-const isActive = (current: string, target: string) => current === target ? "active" : ""
 const update = <T extends string>(items: TabItem<T>[], { title, key }: TabItem<T>) => {
   const index = items.findIndex(item => item.key === key)
   return index > -1 ? items : [...items, { title, key }]
@@ -39,10 +39,13 @@ export const Tab = <T extends string>({ defaultKey, children }: Props<T>) => {
         {tabs.map(({ title, key }) => (
           <div
             key={key}
-            className={`tab-item ${isActive(currentKey, key)}`}
+            className={clsx("tab", key === currentKey && "active")}
             onClick={() => setCurrentKey(key)}
           >
-            {title}
+            <label>
+              <input type="radio" name="tab" defaultChecked />
+              {title}
+            </label>
           </div>
         ))}
       </div>

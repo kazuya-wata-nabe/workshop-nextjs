@@ -255,7 +255,7 @@ const PetView = () => {
         </div>
       </div>
       <div>
-        <Tab defaultKey="">
+        <Tab defaultKey="tab1">
           <Tab.Item title="tab1" tabKey="tab1">
             <div className="table">
               <ul>
@@ -274,7 +274,7 @@ const PetView = () => {
               <button onClick={onClickCreate}>追加</button>
             </div>
           </Tab.Item>
-          <Tab.Item title="2" tabKey="tab2">
+          <Tab.Item title="tab2" tabKey="tab2">
             <div>hoge</div>
           </Tab.Item>
         </Tab>

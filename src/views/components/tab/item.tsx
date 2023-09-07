@@ -13,8 +13,8 @@ export const TabItem = ({ title, tabKey, children }: Props) => {
   const { currentKey, addTab } = useContext(TabContext);
 
   useIsomorphicEffect(() => {
-    addTab(title, currentKey);
-  }, [addTab, currentKey, title]);
+    addTab(title, tabKey);
+  }, [addTab, tabKey, title]);
 
   return tabKey === currentKey ? <>{children}</> : null;
 };
