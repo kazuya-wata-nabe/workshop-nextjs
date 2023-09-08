@@ -1,11 +1,11 @@
 import { createContext } from "react";
 
-type TabState = {
-  currentKey: string;
-  addTab: (title: string, key: string) => void;
+type TabState<T extends string> = {
+  currentKey: T;
+  addTab: (title: string, key: T) => void;
 };
 
-export const TabContext = createContext<TabState>({
+export const TabContext = createContext<TabState<string>>({
   currentKey: "",
   addTab: () => null,
 });

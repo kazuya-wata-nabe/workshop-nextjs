@@ -43,7 +43,7 @@ export const Tab = <T extends string>({ defaultKey, children }: Props<T>) => {
             onClick={() => setCurrentKey(key)}
           >
             <label>
-              <input type="radio" name="tab" defaultChecked />
+              <input type="radio" name="tab" />
               {title}
             </label>
           </div>

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { data } from "./dummy-data";
 import { adaptor } from "./adaptor";
 import { Tab } from "./components/tab";
+import { TabKey } from "./components/tab/types";
 
 type AnimalType = "cat" | "dog" | "fish" | "bird"
 
@@ -45,6 +46,7 @@ type ViewModel = {
   isMaxVolumeError?: boolean;
   isMaxWeightVolumeError?: boolean;
 }
+
 // タブに表示する車両種類の定義
 const TabGroupByKind = {
   tab1: [""],
@@ -255,8 +257,8 @@ const PetView = () => {
         </div>
       </div>
       <div>
-        <Tab defaultKey="tab1">
-          <Tab.Item title="tab1" tabKey="tab1">
+        <Tab<TabKey> defaultKey="tab1">
+          <Tab.Item<TabKey> title="tab1" tabKey="tab2">
             <div className="table">
               <ul>
                 <li>名前</li>
@@ -274,7 +276,7 @@ const PetView = () => {
               <button onClick={onClickCreate}>追加</button>
             </div>
           </Tab.Item>
-          <Tab.Item title="tab2" tabKey="tab2">
+          <Tab.Item<TabKey> title="tab2" tabKey="tab2">
             <div>hoge</div>
           </Tab.Item>
         </Tab>
