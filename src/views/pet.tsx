@@ -214,8 +214,23 @@ const PetView = () => {
   //   }
   // }
   // 新規レコードの作成
-  const onClickCreate = () => {
-    console.log(1)
+  const onClickCreate = (type: AnimalType) => {
+    const item: ViewModel = {
+      id: 0,
+      name: "",
+      volume: 0,
+      type,
+      color: null,
+      totalWeight: 0,
+      maxLoadingVolume: 0,
+      maxLoadingWeight: 0,
+      dailyTransportPlanCount: 0,
+      isApproachAlert: 0,
+      approachAlertRadius: 0,
+      isUse: true,
+      isCreated: true, isEdited: false,
+    }
+    setEditedViewModels(prev => prev.concat(item))
   }
 
   // const convertParams = () => {
@@ -258,7 +273,7 @@ const PetView = () => {
       </div>
       <div>
         <Tab<TabKey> defaultKey="tab1">
-          <Tab.Item<TabKey> title="tab1" tabKey="tab2">
+          <Tab.Item<TabKey> title="tab1" tabKey="tab1">
             <div className="table">
               <ul>
                 <li>名前</li>
@@ -273,7 +288,13 @@ const PetView = () => {
                   </ul>
                 )}
               </div>
-              <button onClick={onClickCreate}>追加</button>
+              {editMode &&
+                <div>
+                  <button onClick={() => onClickCreate("dog")}>dog追加</button>
+                  <button onClick={() => onClickCreate("cat")}>cat追加</button>
+                  <button onClick={() => onClickCreate("fish")}>fish追加</button>
+                </div>
+              }
             </div>
           </Tab.Item>
           <Tab.Item<TabKey> title="tab2" tabKey="tab2">
