@@ -1,12 +1,6 @@
-type Result<T> = {
-  result: "success",
-  json: T
-} | {
-  result: "failure"
-  code: number;
-}
+import { RequestResult } from "./_shared_/types";
 
-const parse = async <T>(res: Response): Promise<Result<T>> => {
+const parse = async <T>(res: Response): Promise<RequestResult<T>> => {
   if (res.status < 400) {
     const json = await res.json() as T;
     return Promise.resolve({ result: "success", json });

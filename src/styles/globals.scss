@@ -1,6 +1,18 @@
 @use "./tab";
 
-html, body, div,a, li, ul ,ol ,h1,h2,h3,h4,h5{
+html,
+body,
+div,
+p,
+a,
+li,
+ul,
+ol,
+h1,
+h2,
+h3,
+h4,
+h5 {
   margin: 0;
   padding: 0;
 }
@@ -14,9 +26,12 @@ li {
   margin: 0 auto;
 
   .controls {
+    min-height: 23px;
     margin-top: 10px;
+
     > div {
       display: inline-block;
+
       &.toggle-use-only {
         width: 200px;
       }
@@ -27,6 +42,10 @@ li {
 .table {
   ul {
     display: flex;
+  }
+  .list-body {
+    height: 150px;
+    overflow-y: scroll;
   }
   li:nth-child(1) {
     width: 200px;

@@ -4,7 +4,7 @@ const items: Omit<Response, "id">[] = [
   {
     name: "hoge",
     volume: 0,
-    type: "cat",
+    type: "ToyPoodle",
     color: "",
     totalWeight: 0,
     maxVolume: 0,
@@ -18,7 +18,7 @@ const items: Omit<Response, "id">[] = [
   {
     name: "fugafugafugafuga",
     volume: 0,
-    type: "dog",
+    type: "Chihuahua",
     color: "",
     totalWeight: 0,
     maxVolume: 0,
@@ -32,7 +32,7 @@ const items: Omit<Response, "id">[] = [
   {
     name: "piyopiyo",
     volume: 0,
-    type: "bird",
+    type: "Pug",
     color: "",
     totalWeight: 0,
     maxVolume: 0,

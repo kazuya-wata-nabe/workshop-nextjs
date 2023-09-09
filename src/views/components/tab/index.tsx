@@ -5,7 +5,9 @@ import { TabItem } from "./item";
 
 type Props<T extends string> = {
   defaultKey: T;
-  children: ReactElement[]
+  children: ReactElement[];
+  isDisabled: (key: T) => boolean;
+  onChange: (key: T) => void;
 };
 
 type TabItem<T extends string> = {
@@ -18,7 +20,7 @@ const update = <T extends string>(items: TabItem<T>[], { title, key }: TabItem<T
   return index > -1 ? items : [...items, { title, key }]
 }
 
-export const Tab = <T extends string>({ defaultKey, children }: Props<T>) => {
+export const Tab = <T extends string>({ defaultKey, children, isDisabled, onChange }: Props<T>) => {
   const [currentKey, setCurrentKey] = useState(defaultKey);
   const [tabs, setTabs] = useState<TabItem<T>[]>([]);
 
@@ -40,10 +42,13 @@ export const Tab = <T extends string>({ defaultKey, children }: Props<T>) => {
           <div
             key={key}
             className={clsx("tab", key === currentKey && "active")}
-            onClick={() => setCurrentKey(key)}
+            onClick={() => !isDisabled(key) && setCurrentKey(key)}
           >
-            <label>
-              <input type="radio" name="tab" />
+            <label className={clsx(isDisabled(key) && "disabled")}>
+              <input type="radio" name="tab"
+                disabled={isDisabled(key)}
+                onChange={() => onChange(key)}
+              />
               {title}
             </label>
           </div>

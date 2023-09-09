@@ -1,10 +1,10 @@
-type PetType = "cat" | "dog" | "fish" | "bird"
+type Type = "ToyPoodle" | "Chihuahua" | "Pug" | "Corgi" | "Bulldog" | "AkitaInu" | "Samoyed"
 
 export type Response = {
   id: number;
   name: string;
   volume: number;
-  type: PetType;
+  type: Type;
   color: string | null;
   totalWeight: number;
   maxVolume: number;

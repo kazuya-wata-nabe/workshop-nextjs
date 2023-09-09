@@ -1,17 +1,20 @@
 import { ENDPOINTS } from "@/repository/endpoints";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { data } from "./dummy-data";
 import { adaptor } from "./adaptor";
 import { Tab } from "./components/tab";
 import { TabKey } from "./components/tab/types";
+import { Table } from "./table";
+import { RequestResult } from "./_shared_/types";
 
-type AnimalType = "cat" | "dog" | "fish" | "bird"
+type Type = "ToyPoodle" | "Chihuahua" | "Pug" | "Corgi" | "Bulldog" | "AkitaInu" | "Samoyed"
+type Size = "micro" | "small" | "medium" | "large"
 
 type Response = {
   id: number;
   name: string;
   volume: number;
-  type: AnimalType;
+  type: Type;
   color: string | null;
   totalWeight: number;
   maxVolume: number;
@@ -23,11 +26,11 @@ type Response = {
   isUse: boolean;
 }
 
-type ViewModel = {
+export type ViewModel = {
   id: number;
   name: string;
   volume: number;
-  type: AnimalType;
+  type: Type;
   color: string | null;
   totalWeight: number;
   maxLoadingVolume: number;
@@ -48,12 +51,12 @@ type ViewModel = {
 }
 
 // タブに表示する車両種類の定義
-const TabGroupByKind = {
-  tab1: [""],
-  tab2: ["cat", "dog"],
-  tab3: ["bird"],
-  tab4: ["fish"],
-}
+const GroupBySize = {
+  micro: ["ToyPoodle", "Chihuahua"],
+  small: ["Pug"],
+  medium: ["Corgi", "Bulldog"],
+  large: ["AkitaInu", "Samoyed"]
+} satisfies Record<Size, Type[]>
 
 const URL = ENDPOINTS["ペット一覧"]
 const translateResponse = (res: Response[]): ViewModel[] => {
@@ -71,11 +74,9 @@ const translateResponse = (res: Response[]): ViewModel[] => {
 const PetView = () => {
   // 編集モードか
   const [editMode, setEditMode] = useState(false)
-  const changeEditMode = (isEdit: boolean) => {
-    setEditMode(isEdit)
-  }
   // 選択中のタブ
-  // const [currentTab, setCurrentTab] = useState("tab1")
+  const [currentTab, setCurrentTab] = useState("tab1")
+  const original = useRef<ViewModel[]>([])
   // 車両プリセット
   // const [presetList, setPresetList] = useState()
 
@@ -127,28 +128,24 @@ const PetView = () => {
   //   const sortedList = vehicles.sort(comparator)
   //   return sortedList;
   // }
-  // // モード切り替え
-  // const onChangeEditMode = (isEdit: boolean, tab: string) => {
-  //   const tabName = isEdit ? tab : ""
-  //   if (!isEdit) {
-  //     const originalList = structuredClone()
-  //     // キャンセルボタンで編集リセット
-  //     setEditedViewModels()
-  //   }
-  //   setEditTab(tabName)
-  //   setEditMode(isEdit)
-  // }
-  // // 編集中のタブ以外を非活性にする
-  // const isDisabledTab = (tab: string) => {
-  //   if (editTab === "") {
-  //     return false
-  //   }
-  //   if (editTab === tabName) {
-  //     return false
-  //   } else {
-  //     return true
-  //   }
-  // }
+  // モード切り替え
+  const onChangeEditMode = (value: boolean) => {
+    if (value) {
+      const originalList = structuredClone(original.current)
+      // キャンセルボタンで編集リセット
+      setEditedViewModels(originalList)
+    }
+    setEditMode(value)
+  }
+  // 編集中のタブ以外を非活性にする
+  const isDisabledTab = (tab: TabKey) => {
+    if (!editMode) return false;
+    if (currentTab === tab) {
+      return false
+    } else {
+      return true
+    }
+  }
   // const onBlurName = () => {
 
   // }
@@ -205,16 +202,8 @@ const PetView = () => {
   //   }
   //   return true
   // }
-
-
-  // const crateTable = () => {
-  //   const cols = []
-  //   switch (tab) {
-  //     // 表示するカラムをPush
-  //   }
-  // }
   // 新規レコードの作成
-  const onClickCreate = (type: AnimalType) => {
+  const onClickCreate = (type: Type) => {
     const item: ViewModel = {
       id: 0,
       name: "",
@@ -230,8 +219,22 @@ const PetView = () => {
       isUse: true,
       isCreated: true, isEdited: false,
     }
-    setEditedViewModels(prev => prev.concat(item))
+    setEditedViewModels(prev => {
+      const ids = prev.map(({ id }) => id)
+      const maxId = ids.length > 0 ? Math.max(...ids) : 0
+      return prev.concat({ ...item, id: maxId + 1 })
+    })
   }
+
+  const filterByType = useMemo(() => {
+    const filtered = (size: Size) => editedViewModels.filter(item => GroupBySize[size].some(type => item.type === type))
+    return {
+      micro: filtered("micro"),
+      small: filtered("small"),
+      medium: filtered("medium"),
+      large: filtered("large"),
+    }
+  }, [editedViewModels])
 
   // const convertParams = () => {
   //   // 新規
@@ -250,11 +253,17 @@ const PetView = () => {
     console.log("save!")
     adaptor.get<Response>(URL)
       .then(() => setEditMode(false))
-      .catch(console.error)
+      .catch((e: Extract<RequestResult, { result: "failure" }>) => {
+        if (e.code === 400) {
+          alert("保存失敗!!")
+        }
+        throw e;
+      })
   }
 
   // 初期表示
   useEffect(() => {
+    original.current = translateResponse(data)
     setEditedViewModels(translateResponse(data))
   }, [])
 
@@ -262,43 +271,58 @@ const PetView = () => {
     <main className="container">
       <div className="controls">
         <div className="toggle-use-only">
-          {!editMode && <span><input type="checkbox" checked={useOnly} onChange={({ target }) => onChangeUseOnly(target.checked)} />利用のみ表示</span>}
-          {editMode && <span style={{ marginLeft: "20px" }}>編集モード</span>}
+          {!editMode && currentTab === "tab1" && <span><input type="checkbox" checked={useOnly} onChange={({ target }) => onChangeUseOnly(target.checked)} />利用のみ表示</span>}
         </div>
         <div>
-          {!editMode && <button onClick={() => changeEditMode(true)}>編集</button>}
-          {editMode && <button onClick={() => changeEditMode(false)}>キャンセル</button>}
+          {!editMode && currentTab === "tab1" && <p>編集は各タブへ</p>}
+          {!editMode && currentTab !== "tab1" && <button onClick={() => onChangeEditMode(true)}>編集</button>}
+          {editMode && <button onClick={() => onChangeEditMode(false)}>キャンセル</button>}
           {editMode && <button onClick={() => onSave()}>保存</button>}
         </div>
       </div>
       <div>
-        <Tab<TabKey> defaultKey="tab1">
-          <Tab.Item<TabKey> title="tab1" tabKey="tab1">
-            <div className="table">
-              <ul>
-                <li>名前</li>
-                <li>種類</li>
-              </ul>
-              <hr />
-              <div>
-                {itemsWithUseOnly.map(item =>
-                  <ul key={item.id}>
-                    <li className="col">{item.name}</li>
-                    <li className="col">{item.type}</li>
-                  </ul>
-                )}
-              </div>
-              {editMode &&
-                <div>
-                  <button onClick={() => onClickCreate("dog")}>dog追加</button>
-                  <button onClick={() => onClickCreate("cat")}>cat追加</button>
-                  <button onClick={() => onClickCreate("fish")}>fish追加</button>
-                </div>
-              }
-            </div>
+        <Tab<TabKey> defaultKey="tab1" isDisabled={isDisabledTab} onChange={setCurrentTab}>
+          <Tab.Item<TabKey> title="全て" tabKey="tab1">
+            <Table {...{ editMode: false, size: "all", items: itemsWithUseOnly }} />
           </Tab.Item>
-          <Tab.Item<TabKey> title="tab2" tabKey="tab2">
-            <div>hoge</div>
+          <Tab.Item<TabKey> title="超小型犬" tabKey="tab2">
+            <Table {...{ editMode, size: "micro", items: filterByType.micro }} />
+            {
+              editMode &&
+              <div>
+                <button onClick={() => onClickCreate("ToyPoodle")}>追加</button>
+                <button onClick={() => onClickCreate("Chihuahua")}>追加</button>
+              </div>
+            }
+          </Tab.Item>
+          <Tab.Item<TabKey> title="小型犬" tabKey="tab3">
+            <Table {...{ editMode, size: "small", items: filterByType.small }} />
+            {
+              editMode &&
+              <div>
+                <button onClick={() => onClickCreate("Pug")}>追加</button>
+              </div>
+            }
+          </Tab.Item>
+          <Tab.Item<TabKey> title="中型犬" tabKey="tab4">
+            <Table {...{ editMode, size: "medium", items: filterByType.medium, key: filterByType.medium.length }} />
+            {
+              editMode &&
+              <div>
+                <button onClick={() => onClickCreate("Corgi")}>追加</button>
+                <button onClick={() => onClickCreate("Bulldog")}>追加</button>
+              </div>
+            }
+          </Tab.Item>
+          <Tab.Item<TabKey> title="大型犬" tabKey="tab5">
+            <Table {...{ editMode, size: "large", items: filterByType.large, key: filterByType.large.length }} />
+            {
+              editMode &&
+              <div>
+                <button onClick={() => onClickCreate("AkitaInu")}>追加</button>
+                <button onClick={() => onClickCreate("Samoyed")}>追加</button>
+              </div>
+            }
           </Tab.Item>
         </Tab>
       </div>

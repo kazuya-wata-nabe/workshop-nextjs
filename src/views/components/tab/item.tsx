@@ -1,10 +1,10 @@
-import { ReactElement, useContext, useEffect, useLayoutEffect } from "react";
+import {  ReactNode, useContext, useEffect, useLayoutEffect } from "react";
 import { TabContext } from "./context";
 
 type Props<T extends string> = {
   tabKey: T;
   title: string;
-  children: ReactElement
+  children: ReactNode
 };
 
 const useIsomorphicEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect
