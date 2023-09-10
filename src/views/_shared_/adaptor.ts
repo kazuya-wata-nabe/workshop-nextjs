@@ -1,4 +1,4 @@
-import { RequestResult } from "./_shared_/types";
+import { RequestResult } from "./types";
 
 const parse = async <T>(res: Response): Promise<RequestResult<T>> => {
   if (res.status < 400) {

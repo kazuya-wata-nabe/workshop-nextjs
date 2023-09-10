@@ -1,4 +1,4 @@
-import PetView from "@/views/pet"
+import PetView from "@/views/vehicles"
 
 const Pet = () => {
   return (

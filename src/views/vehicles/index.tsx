@@ -1,9 +1,9 @@
 import { ENDPOINTS } from "@/repository/endpoints";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RequestResult } from "./_shared_/types";
-import { adaptor } from "./adaptor";
-import { Tab } from "./components/tab";
-import { TabKey } from "./components/tab/types";
+import { adaptor } from "../_shared_/adaptor";
+import { Tab } from "../_shared_/components/tab";
+import { TabKey } from "../_shared_/components/tab/types";
+import { RequestResult } from "../_shared_/types";
 import { data } from "./dummy-data";
 import { Table } from "./table";
 
@@ -101,21 +101,21 @@ const PetView = () => {
       }
     })
   }
-  // const nameComparator = (a: ViewModel, b: ViewModel) => {
-  //   if (a.name == b.name) return 0;
-  //   return a.name < b.name ? -1 : 1
-  // }
-  // /** */
-  // const idComparator = (a: ViewModel, b: ViewModel) => {
-  //   return a.id - b.id;
-  // }
-  // /**
-  //  * ソートのコンパレータ 条件: 1. 種類, 2. 名前
-  //  */
-  // const comparator = (a: ViewModel, b: ViewModel) => {
-  //   const firstCmpResult = nameComparator(a, b)
-  //   return firstCmpResult !== 0 ? firstCmpResult : idComparator(a, b)
-  // }
+  const nameComparator = (a: ViewModel, b: ViewModel) => {
+    if (a.name == b.name) return 0;
+    return a.name < b.name ? -1 : 1
+  }
+  /** */
+  const idComparator = (a: ViewModel, b: ViewModel) => {
+    return a.id - b.id;
+  }
+  /**
+   * ソートのコンパレータ 条件: 1. 種類, 2. 名前
+   */
+  const comparator = (a: ViewModel, b: ViewModel) => {
+    const firstCmpResult = nameComparator(a, b)
+    return firstCmpResult !== 0 ? firstCmpResult : idComparator(a, b)
+  }
 
   // モード切り替え
   const onChangeEditMode = (value: boolean) => {
@@ -252,8 +252,11 @@ const PetView = () => {
 
   // 初期表示
   useEffect(() => {
-    original.current = translateResponse(data)
-    setEditedViewModels(translateResponse(data))
+    const viewModels = translateResponse(data)
+    const sorted = viewModels.sort(comparator)
+    original.current = [...sorted]
+    setEditedViewModels([...sorted])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

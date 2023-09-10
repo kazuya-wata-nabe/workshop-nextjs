@@ -1,4 +1,4 @@
-import { ViewModel } from "./pet";
+import { ViewModel } from ".";
 
 type Props = {
   items: ViewModel[];
