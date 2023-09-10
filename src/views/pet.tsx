@@ -1,11 +1,11 @@
 import { ENDPOINTS } from "@/repository/endpoints";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { data } from "./dummy-data";
+import { RequestResult } from "./_shared_/types";
 import { adaptor } from "./adaptor";
 import { Tab } from "./components/tab";
 import { TabKey } from "./components/tab/types";
+import { data } from "./dummy-data";
 import { Table } from "./table";
-import { RequestResult } from "./_shared_/types";
 
 type Type = "ToyPoodle" | "Chihuahua" | "Pug" | "Corgi" | "Bulldog" | "AkitaInu" | "Samoyed"
 type Size = "micro" | "small" | "medium" | "large"
@@ -59,15 +59,6 @@ const GroupBySize = {
 } satisfies Record<Size, Type[]>
 
 const URL = ENDPOINTS["ペット一覧"]
-const translateResponse = (res: Response[]): ViewModel[] => {
-  return res.map(r => {
-    return {
-      ...r,
-      isCreated: false,
-      isEdited: false,
-    }
-  })
-}
 /**
  * ペット一覧のビューコンポーネント
  */
@@ -90,6 +81,26 @@ const PetView = () => {
   // const [modal, setModal] = useState()
   const onChangeUseOnly = (value: boolean) => setUseOnly(value);
 
+  const translateResponse = (res: Response[]): ViewModel[] => {
+    return res.map(r => {
+      return {
+        id: r.id,
+        name: r.name,
+        volume: r.volume,
+        type: r.type,
+        color: r.color,
+        totalWeight: r.totalWeight,
+        maxLoadingVolume: r.maxLoadingVolume,
+        maxLoadingWeight: r.maxLoadingWeight,
+        dailyTransportPlanCount: r.dailyTransportPlanCount,
+        isApproachAlert: r.isApproachAlert,
+        approachAlertRadius: r.approachAlertRadius,
+        isUse: r.isUse,
+        isCreated: false,
+        isEdited: false,
+      }
+    })
+  }
   // const nameComparator = (a: ViewModel, b: ViewModel) => {
   //   if (a.name == b.name) return 0;
   //   return a.name < b.name ? -1 : 1
@@ -106,28 +117,6 @@ const PetView = () => {
   //   return firstCmpResult !== 0 ? firstCmpResult : idComparator(a, b)
   // }
 
-  // const translateVehicleList = (response: Response[]) => {
-  //   const vehicles = response.map(res => {
-  //     const vehicle: ViewModel = {
-  //       id: res.id,
-  //       name: res.name,
-  //       volume: res.volume,
-  //       type: res.type,
-  //       color: res.color,
-  //       totalWeight: res.totalWeight,
-  //       maxLoadingWeight: res.maxLoadingWeight,
-  //       maxLoadingVolume: res.maxLoadingVolume,
-  //       dailyTransportPlanCount: res.dailyTransportPlanCount,
-  //       isApproachAlert: res.isApproachAlert,
-  //       approachAlertRadius: res.approachAlertRadius,
-  //       isUse: res.isUse,
-  //       isCreated: false, isEdited: false,
-  //     }
-  //     return vehicle;
-  //   })
-  //   const sortedList = vehicles.sort(comparator)
-  //   return sortedList;
-  // }
   // モード切り替え
   const onChangeEditMode = (value: boolean) => {
     if (value) {
@@ -296,7 +285,7 @@ const PetView = () => {
             }
           </Tab.Item>
           <Tab.Item<TabKey> title="小型犬" tabKey="tab3">
-            <Table {...{ editMode, size: "small", items: filterByType.small }} />
+            <Table {...{ editMode, items: filterByType.small }} />
             {
               editMode &&
               <div>
@@ -305,7 +294,7 @@ const PetView = () => {
             }
           </Tab.Item>
           <Tab.Item<TabKey> title="中型犬" tabKey="tab4">
-            <Table {...{ editMode, size: "medium", items: filterByType.medium, key: filterByType.medium.length }} />
+            <Table {...{ editMode, items: filterByType.medium }} />
             {
               editMode &&
               <div>
@@ -315,7 +304,7 @@ const PetView = () => {
             }
           </Tab.Item>
           <Tab.Item<TabKey> title="大型犬" tabKey="tab5">
-            <Table {...{ editMode, size: "large", items: filterByType.large, key: filterByType.large.length }} />
+            <Table {...{ editMode, items: filterByType.large }} />
             {
               editMode &&
               <div>
