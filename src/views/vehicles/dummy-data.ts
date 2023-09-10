@@ -1,10 +1,10 @@
-import { Response } from "./types"
+import { Response, VehicleType } from "./types"
 
 const items: Omit<Response, "id">[] = [
   {
     name: "hoge",
     volume: 0,
-    type: "ToyPoodle",
+    type: VehicleType.ON_ROAD_DUMP,
     color: "",
     totalWeight: 0,
     maxVolume: 0,
@@ -18,7 +18,7 @@ const items: Omit<Response, "id">[] = [
   {
     name: "fugafugafugafuga",
     volume: 0,
-    type: "Chihuahua",
+    type: VehicleType.OFF_ROAD_DUMP,
     color: "",
     totalWeight: 0,
     maxVolume: 0,
@@ -32,7 +32,7 @@ const items: Omit<Response, "id">[] = [
   {
     name: "piyopiyo",
     volume: 0,
-    type: "Pug",
+    type: VehicleType.BULLDOZER,
     color: "",
     totalWeight: 0,
     maxVolume: 0,

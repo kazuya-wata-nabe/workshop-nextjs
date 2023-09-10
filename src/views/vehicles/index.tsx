@@ -6,31 +6,13 @@ import { TabKey } from "../_shared_/components/tab/types";
 import { RequestResult } from "../_shared_/types";
 import { data } from "./dummy-data";
 import { Table } from "./table";
-
-type Type = "ToyPoodle" | "Chihuahua" | "Pug" | "Corgi" | "Bulldog" | "AkitaInu" | "Samoyed"
-type Size = "micro" | "small" | "medium" | "large"
-
-type Response = {
-  id: number;
-  name: string;
-  volume: number;
-  type: Type;
-  color: string | null;
-  totalWeight: number;
-  maxVolume: number;
-  maxLoadingVolume: number;
-  maxLoadingWeight: number;
-  dailyTransportPlanCount: number;
-  isApproachAlert: number;
-  approachAlertRadius: number;
-  isUse: boolean;
-}
+import { VehicleType, Response } from "./types";
 
 export type ViewModel = {
   id: number;
   name: string;
   volume: number;
-  type: Type;
+  type: VehicleType;
   color: string | null;
   totalWeight: number;
   maxLoadingVolume: number;
@@ -50,37 +32,35 @@ export type ViewModel = {
   isMaxWeightVolumeError?: boolean;
 }
 
+const TYPE_SORT_ORDER = [
+  VehicleType.ON_ROAD_DUMP,
+  VehicleType.OFF_ROAD_DUMP,
+  VehicleType.SHOVEL,
+  VehicleType.BULLDOZER,
+];
 // タブに表示する車両種類の定義
-const GroupBySize = {
-  micro: ["ToyPoodle", "Chihuahua"],
-  small: ["Pug"],
-  medium: ["Corgi", "Bulldog"],
-  large: ["AkitaInu", "Samoyed"]
-} satisfies Record<Size, Type[]>
+const GroupByTab = {
+  tab2: ["ON_ROAD_DUMP", "OFF_ROAD_DUMP"],
+  tab3: ["BULLDOZER", "SHOVEL"],
+  tab4: ["TANK_TRUCK"],
+} as const
 
 const URL = ENDPOINTS["ペット一覧"]
 /**
- * ペット一覧のビューコンポーネント
+ * はたらくくるま
  */
-const PetView = () => {
+export const VehiclesView = () => {
   // 編集モードか
   const [editMode, setEditMode] = useState(false)
   // 選択中のタブ
   const [currentTab, setCurrentTab] = useState("tab1")
-  const original = useRef<ViewModel[]>([])
-  // 車両プリセット
-  // const [presetList, setPresetList] = useState()
-
-  // ビューモデル一覧
-  // const viewModels = useRef<ViewModel[]>([])
-  // 編集ビューモデル一覧
-  const [editedViewModels, setEditedViewModels] = useState<ViewModel[]>([])
   // 表示のフィルタ
   const [useOnly, setUseOnly] = useState(false)
-  // モーダル
-  // const [modal, setModal] = useState()
-  const onChangeUseOnly = (value: boolean) => setUseOnly(value);
-
+  // ビューモデル一覧
+  const original = useRef(Array<ViewModel>())
+  // 編集ビューモデル一覧
+  const [editedViewModels, setEditedViewModels] = useState(Array<ViewModel>())
+  // レスポンスを画面用に変換する関数
   const translateResponse = (res: Response[]): ViewModel[] => {
     return res.map(r => {
       return {
@@ -101,20 +81,17 @@ const PetView = () => {
       }
     })
   }
-  const nameComparator = (a: ViewModel, b: ViewModel) => {
+  const firstComparator = (a: ViewModel, b: ViewModel) => {
+    return TYPE_SORT_ORDER.findIndex(type => type === a.type)
+    - TYPE_SORT_ORDER.findIndex(type => type === b.type);
+  }
+  const secondComparator = (a: ViewModel, b: ViewModel) => {
     if (a.name == b.name) return 0;
     return a.name < b.name ? -1 : 1
   }
-  /** */
-  const idComparator = (a: ViewModel, b: ViewModel) => {
-    return a.id - b.id;
-  }
-  /**
-   * ソートのコンパレータ 条件: 1. 種類, 2. 名前
-   */
   const comparator = (a: ViewModel, b: ViewModel) => {
-    const firstCmpResult = nameComparator(a, b)
-    return firstCmpResult !== 0 ? firstCmpResult : idComparator(a, b)
+    const firstCmpResult = firstComparator(a, b)
+    return firstCmpResult !== 0 ? firstCmpResult : secondComparator(a, b)
   }
 
   // モード切り替え
@@ -192,7 +169,7 @@ const PetView = () => {
   //   return true
   // }
   // 新規レコードの作成
-  const onClickCreate = (type: Type) => {
+  const onClickCreate = (type: VehicleType) => {
     const item: ViewModel = {
       id: 0,
       name: "",
@@ -216,12 +193,11 @@ const PetView = () => {
   }
 
   const filterByType = useMemo(() => {
-    const filtered = (size: Size) => editedViewModels.filter(item => GroupBySize[size].some(type => item.type === type))
+    const filtered = (tab: Exclude<TabKey, "tab1">) => editedViewModels.filter(item => GroupByTab[tab].some(type => item.type === type))
     return {
-      micro: filtered("micro"),
-      small: filtered("small"),
-      medium: filtered("medium"),
-      large: filtered("large"),
+      tab2: filtered("tab2"),
+      tab3: filtered("tab3"),
+      tab4: filtered("tab4"),
     }
   }, [editedViewModels])
 
@@ -239,7 +215,6 @@ const PetView = () => {
   }, [editedViewModels, useOnly])
 
   const onSave = () => {
-    console.log("save!")
     adaptor.get<Response>(URL)
       .then(() => setEditMode(false))
       .catch((e: Extract<RequestResult, { result: "failure" }>) => {
@@ -256,14 +231,14 @@ const PetView = () => {
     const sorted = viewModels.sort(comparator)
     original.current = [...sorted]
     setEditedViewModels([...sorted])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
     <main className="container">
       <div className="controls">
         <div className="toggle-use-only">
-          {!editMode && currentTab === "tab1" && <span><input type="checkbox" checked={useOnly} onChange={({ target }) => onChangeUseOnly(target.checked)} />利用のみ表示</span>}
+          {!editMode && currentTab === "tab1" && <span><input type="checkbox" checked={useOnly} onChange={({ target }) => setUseOnly(target.checked)} />利用のみ表示</span>}
         </div>
         <div>
           {!editMode && currentTab === "tab1" && <p>編集は各タブへ</p>}
@@ -277,42 +252,33 @@ const PetView = () => {
           <Tab.Item<TabKey> title="全て" tabKey="tab1">
             <Table {...{ editMode: false, size: "all", items: itemsWithUseOnly }} />
           </Tab.Item>
-          <Tab.Item<TabKey> title="超小型犬" tabKey="tab2">
-            <Table {...{ editMode, size: "micro", items: filterByType.micro }} />
+          <Tab.Item<TabKey> title="ダンプ" tabKey="tab2">
+            <Table {...{ editMode, items: filterByType.tab2 }} />
             {
               editMode &&
               <div>
-                <button onClick={() => onClickCreate("ToyPoodle")}>追加</button>
-                <button onClick={() => onClickCreate("Chihuahua")}>追加</button>
+                <button onClick={() => onClickCreate("ON_ROAD_DUMP")}>追加</button>
+                <button onClick={() => onClickCreate("OFF_ROAD_DUMP")}>追加</button>
               </div>
             }
           </Tab.Item>
-          <Tab.Item<TabKey> title="小型犬" tabKey="tab3">
-            <Table {...{ editMode, items: filterByType.small }} />
+          <Tab.Item<TabKey> title="重機" tabKey="tab3">
+            <Table {...{ editMode, items: filterByType.tab4 }} />
             {
               editMode &&
               <div>
-                <button onClick={() => onClickCreate("Pug")}>追加</button>
+                <button onClick={() => onClickCreate("BULLDOZER")}>追加</button>
+                <button onClick={() => onClickCreate("SHOVEL")}>追加</button>
               </div>
             }
           </Tab.Item>
-          <Tab.Item<TabKey> title="中型犬" tabKey="tab4">
-            <Table {...{ editMode, items: filterByType.medium }} />
+          <Tab.Item<TabKey> title="その他" tabKey="tab4">
+            <Table {...{ editMode, items: filterByType.tab4 }} />
             {
               editMode &&
               <div>
-                <button onClick={() => onClickCreate("Corgi")}>追加</button>
-                <button onClick={() => onClickCreate("Bulldog")}>追加</button>
-              </div>
-            }
-          </Tab.Item>
-          <Tab.Item<TabKey> title="大型犬" tabKey="tab5">
-            <Table {...{ editMode, items: filterByType.large }} />
-            {
-              editMode &&
-              <div>
-                <button onClick={() => onClickCreate("AkitaInu")}>追加</button>
-                <button onClick={() => onClickCreate("Samoyed")}>追加</button>
+                <button onClick={() => onClickCreate("BULLDOZER")}>追加</button>
+                <button onClick={() => onClickCreate("SHOVEL")}>追加</button>
               </div>
             }
           </Tab.Item>
@@ -321,5 +287,3 @@ const PetView = () => {
     </main >
   )
 }
-
-export default PetView;
