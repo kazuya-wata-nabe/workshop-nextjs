@@ -4,16 +4,15 @@ import { adaptor } from "../_shared_/adaptor";
 import { Tab } from "../_shared_/components/tab";
 import { TabKey } from "../_shared_/components/tab/types";
 import { RequestResult } from "../_shared_/types";
-import { data } from "./dummy-data";
 import { Table } from "./table";
-import { VehicleType, Response } from "./types";
+import { VehicleType, VehicleResponse } from "./_shared_/types";
+import { fetchList } from "./repository/on-memory";
 
 export type ViewModel = {
   id: number;
   name: string;
   volume: number;
   type: VehicleType;
-  color: string | null;
   totalWeight: number;
   maxLoadingVolume: number;
   maxLoadingWeight: number;
@@ -43,7 +42,7 @@ const GroupByTab = {
   tab2: ["ON_ROAD_DUMP", "OFF_ROAD_DUMP"],
   tab3: ["BULLDOZER", "SHOVEL"],
   tab4: ["TANK_TRUCK"],
-} as const
+} satisfies Record<Exclude<TabKey, "tab1">, VehicleType[]>
 
 const URL = ENDPOINTS["ペット一覧"]
 /**
@@ -61,14 +60,13 @@ export const VehiclesView = () => {
   // 編集ビューモデル一覧
   const [editedViewModels, setEditedViewModels] = useState(Array<ViewModel>())
   // レスポンスを画面用に変換する関数
-  const translateResponse = (res: Response[]): ViewModel[] => {
+  const translateResponse = (res: VehicleResponse[]): ViewModel[] => {
     return res.map(r => {
       return {
         id: r.id,
         name: r.name,
         volume: r.volume,
         type: r.type,
-        color: r.color,
         totalWeight: r.totalWeight,
         maxLoadingVolume: r.maxLoadingVolume,
         maxLoadingWeight: r.maxLoadingWeight,
@@ -83,7 +81,7 @@ export const VehiclesView = () => {
   }
   const firstComparator = (a: ViewModel, b: ViewModel) => {
     return TYPE_SORT_ORDER.findIndex(type => type === a.type)
-    - TYPE_SORT_ORDER.findIndex(type => type === b.type);
+      - TYPE_SORT_ORDER.findIndex(type => type === b.type);
   }
   const secondComparator = (a: ViewModel, b: ViewModel) => {
     if (a.name == b.name) return 0;
@@ -175,7 +173,6 @@ export const VehiclesView = () => {
       name: "",
       volume: 0,
       type,
-      color: null,
       totalWeight: 0,
       maxLoadingVolume: 0,
       maxLoadingWeight: 0,
@@ -215,7 +212,7 @@ export const VehiclesView = () => {
   }, [editedViewModels, useOnly])
 
   const onSave = () => {
-    adaptor.get<Response>(URL)
+    adaptor.post<Response>(URL)
       .then(() => setEditMode(false))
       .catch((e: Extract<RequestResult, { result: "failure" }>) => {
         if (e.code === 400) {
@@ -227,10 +224,14 @@ export const VehiclesView = () => {
 
   // 初期表示
   useEffect(() => {
-    const viewModels = translateResponse(data)
-    const sorted = viewModels.sort(comparator)
-    original.current = [...sorted]
-    setEditedViewModels([...sorted])
+    fetchList()
+      .then(data => {
+        const viewModels = translateResponse(data)
+        const sorted = viewModels.sort(comparator)
+        original.current = [...sorted]
+        setEditedViewModels([...sorted])
+      })
+      .catch(e => { throw e; })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -263,7 +264,7 @@ export const VehiclesView = () => {
             }
           </Tab.Item>
           <Tab.Item<TabKey> title="重機" tabKey="tab3">
-            <Table {...{ editMode, items: filterByType.tab4 }} />
+            <Table {...{ editMode, items: filterByType.tab3 }} />
             {
               editMode &&
               <div>

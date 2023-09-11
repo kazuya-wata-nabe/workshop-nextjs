@@ -8,12 +8,11 @@ export const VehicleType = {
 
 export type VehicleType = typeof VehicleType[keyof typeof VehicleType]
 
-export type Response = {
+export type VehicleResponse = {
   id: number;
   name: string;
   volume: number;
   type: VehicleType;
-  color: string | null;
   totalWeight: number;
   maxVolume: number;
   maxLoadingVolume: number;

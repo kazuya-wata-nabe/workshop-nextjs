@@ -21,6 +21,7 @@ const post = async <T>(url: string, params?: Record<string, string>) => {
   return parse<T>(res)
 }
 
+
 export const adaptor = {
   get, post
 } as const
