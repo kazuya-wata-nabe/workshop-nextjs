@@ -4,32 +4,9 @@ import { adaptor } from "../_shared_/adaptor";
 import { Tab } from "../_shared_/components/tab";
 import { TabKey } from "../_shared_/components/tab/types";
 import { RequestResult } from "../_shared_/types";
-import { Table } from "./table";
-import { VehicleType, VehicleResponse } from "./_shared_/types";
+import { Table } from "./components/table";
+import { VehicleType, VehicleResponse, ViewModel } from "./_shared_/types";
 import { fetchList } from "./repository/on-memory";
-
-export type ViewModel = {
-  id: number;
-  name: string;
-  volume: number;
-  type: VehicleType;
-  totalWeight: number;
-  maxLoadingVolume: number;
-  maxLoadingWeight: number;
-  dailyTransportPlanCount: number;
-  isApproachAlert: number;
-  approachAlertRadius: number;
-  isUse: boolean;
-  // 新規レコードかどうか
-  isCreated: boolean;
-  // 既存レコードで編集されたかどうか
-  isEdited: boolean;
-  // エラー
-  isNameError?: boolean;
-  isVolumeError?: boolean;
-  isMaxVolumeError?: boolean;
-  isMaxWeightVolumeError?: boolean;
-}
 
 const TYPE_SORT_ORDER = [
   VehicleType.ON_ROAD_DUMP,
@@ -101,7 +78,9 @@ export const VehiclesView = () => {
     }
     setEditMode(value)
   }
-  // 編集中のタブ以外を非活性にする
+  // タブ遷移の制御
+  // 編集モード中は遷移禁止
+  // 自タブ以外のカーソルアイコンを変える
   const isDisabledTab = (tab: TabKey) => {
     if (!editMode) return false;
     if (currentTab === tab) {
@@ -212,7 +191,7 @@ export const VehiclesView = () => {
   }, [editedViewModels, useOnly])
 
   const onSave = () => {
-    adaptor.post<Response>(URL)
+    adaptor.post<{ id: number }>(URL)
       .then(() => setEditMode(false))
       .catch((e: Extract<RequestResult, { result: "failure" }>) => {
         if (e.code === 400) {
@@ -226,10 +205,10 @@ export const VehiclesView = () => {
   useEffect(() => {
     fetchList()
       .then(data => {
-        const viewModels = translateResponse(data)
-        const sorted = viewModels.sort(comparator)
-        original.current = [...sorted]
-        setEditedViewModels([...sorted])
+        const viewModels = translateResponse(data).sort(comparator)
+        const clone = structuredClone(viewModels)
+        original.current = viewModels
+        setEditedViewModels(clone)
       })
       .catch(e => { throw e; })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -278,8 +257,7 @@ export const VehiclesView = () => {
             {
               editMode &&
               <div>
-                <button onClick={() => onClickCreate("BULLDOZER")}>追加</button>
-                <button onClick={() => onClickCreate("SHOVEL")}>追加</button>
+                <button onClick={() => onClickCreate("TANK_TRUCK")}>追加</button>
               </div>
             }
           </Tab.Item>

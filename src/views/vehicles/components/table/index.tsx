@@ -1,6 +1,7 @@
-import { ViewModel } from ".";
+import { ViewModel } from "../../_shared_/types";
 
 type Props = {
+  editMode: boolean;
   items: ViewModel[];
 }
 

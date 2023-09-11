@@ -31,3 +31,26 @@ export const TabKey = {
 } as const
 
 export type TabKey = typeof TabKey[keyof typeof TabKey]
+
+export type ViewModel = {
+  id: number;
+  name: string;
+  volume: number;
+  type: VehicleType;
+  totalWeight: number;
+  maxLoadingVolume: number;
+  maxLoadingWeight: number;
+  dailyTransportPlanCount: number;
+  isApproachAlert: number;
+  approachAlertRadius: number;
+  isUse: boolean;
+  // 新規レコードかどうか
+  isCreated: boolean;
+  // 既存レコードで編集されたかどうか
+  isEdited: boolean;
+  // エラー
+  isNameError?: boolean;
+  isVolumeError?: boolean;
+  isMaxVolumeError?: boolean;
+  isMaxWeightVolumeError?: boolean;
+}
