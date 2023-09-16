@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { adaptor } from "../_shared_/adaptor";
 import { useTextController } from "./sample-hook";
 import { SampleModel, SampleResponse } from "./sample-type";
@@ -9,25 +9,23 @@ export const SampleComponent = () => {
   const [models, setModels] = useState<SampleModel[]>([])
   const { text, handleChange } = useTextController()
 
-  const initializeModels = useCallback((res: SampleResponse[]) => {
-    const items = res.map(d => {
-      const [year, month, day] = d.birthday.split("-")
-      return {
-        id: d.id,
-        name: d.name,
-        birthday: { year, month, day },
-      }
-    })
-    items.sort((a, b) => a.name > b.name ? 1 : -1)
-    setModels(items)
-  }, [])
-
   useEffect(() => {
     // ユーザ一覧取得
     adaptor.get<SampleResponse[]>("/users")
-      .then(({ data }) => initializeModels(data))
+      .then(({ data }) => {
+        const items = data.map(d => {
+          const [year, month, day] = d.birthday.split("-")
+          return {
+            id: d.id,
+            name: d.name,
+            birthday: { year, month, day },
+          }
+        })
+        items.sort((a, b) => a.name > b.name ? 1 : -1)
+        setModels(items)
+      })
       .catch(err => alert(err))
-  }, [initializeModels])
+  }, [])
 
   return (
     <div>
