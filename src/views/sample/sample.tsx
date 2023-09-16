@@ -13,7 +13,7 @@ export const SampleComponent = () => {
     // ユーザ一覧取得
     adaptor.get<SampleResponse[]>("/users")
       .then(({ data }) => {
-        const items = data.map(d => {
+        const _models = data.map(d => {
           const [year, month, day] = d.birthday.split("-")
           return {
             id: d.id,
@@ -21,8 +21,8 @@ export const SampleComponent = () => {
             birthday: { year, month, day },
           }
         })
-        items.sort((a, b) => a.name > b.name ? 1 : -1)
-        setModels(items)
+        _models.sort((a, b) => a.name > b.name ? 1 : -1)
+        setModels(_models)
       })
       .catch(err => alert(err))
   }, [])
