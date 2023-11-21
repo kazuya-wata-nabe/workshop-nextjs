@@ -1,6 +1,7 @@
 import { SampleModel, SampleResponse } from "./sample-type"
 
-const comp = (a: SampleModel, b: SampleModel) => a.birthday.getTime() - b.birthday.getTime()
+const comp = (a: SampleModel, b: SampleModel) => 
+  a.birthday.getTime() - b.birthday.getTime()
 export const convertToSortedModels = (data: SampleResponse[]) => {
   const items = data.map(d => {
     return {
@@ -11,3 +12,4 @@ export const convertToSortedModels = (data: SampleResponse[]) => {
   })
   return [...items].sort(comp)
 }
+

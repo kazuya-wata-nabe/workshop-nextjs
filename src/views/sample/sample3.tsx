@@ -6,7 +6,8 @@ import { SampleModel, SampleResponse } from "./sample-type";
 export const SampleComponent = () => {
   const { text, handleOnChange } = useTextController()
   const [models, setModels] = useState<SampleModel[]>([])
-  const comp = (a: SampleModel, b: SampleModel) => a.birthday.getTime() - b.birthday.getTime()
+  const comp = (a: SampleModel, b: SampleModel) => 
+    a.birthday.getTime() - b.birthday.getTime()
 
   useEffect(() => {
     // ユーザ一覧取得

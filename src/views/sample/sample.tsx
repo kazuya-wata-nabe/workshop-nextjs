@@ -1,23 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { adaptor } from "../_shared_/adaptor";
+import { convertToSortedModels } from "./converter";
 import { useTextController } from "./sample-hook";
 import { SampleModel, SampleResponse } from "./sample-type";
 
 export const SampleComponent = () => {
   const { text, handleOnChange } = useTextController()
   const [models, setModels] = useState<SampleModel[]>([])
-  const comp = (a: SampleModel, b: SampleModel) => a.birthday.getTime() - b.birthday.getTime()
-
-  const convertToSortedModels = useCallback((data: SampleResponse[]) => {
-    const items = data.map(d => {
-      return {
-        id: d.id,
-        name: d.name,
-        birthday: new Date(d.birthday),
-      }
-    })
-    return [...items].sort(comp)
-  }, [])
 
   useEffect(() => {
     // ユーザ一覧取得
@@ -27,7 +16,7 @@ export const SampleComponent = () => {
         setModels(_models)
       })
       .catch(err => alert(err))
-  }, [convertToSortedModels])
+  }, [])
 
   return (
     <div>
